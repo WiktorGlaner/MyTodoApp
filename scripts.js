@@ -4,6 +4,11 @@ let todoList = []; //declares a new array for Your todo list
 
 
 let initList = function() {
+    let savedList = window.localStorage.getItem("todos");
+    if (savedList != null)
+        todoList = JSON.parse(savedList);
+    else
+    //code creating a default list with 2 items
     todoList.push(
     {
         title: "Learn JS",
@@ -35,6 +40,32 @@ let updateTodoList = function() {
     }
 
     //add all elements
+    let filterInput = document.getElementById("inputSearch");   
+    for (let todo in todoList) {
+    if (
+        (filterInput.value == "") ||
+        (todoList[todo].title.includes(filterInput.value)) ||
+        (todoList[todo].description.includes(filterInput.value))
+    )   {
+        let newElement = document.createElement("p");
+        let newContent = document.createTextNode(todoList[todo].title + " " +
+                                                todoList[todo].description);
+
+        //add delete button
+        let newDeleteButton = document.createElement("input");
+        newDeleteButton.type = "button";
+        newDeleteButton.value = "x";
+        newDeleteButton.addEventListener("click",
+            function() {
+                deleteTodo(todo);
+            });
+        newElement.appendChild(newContent);
+        newElement.appendChild(newDeleteButton);
+        todoListDiv.appendChild(newElement);
+        }
+    }
+    /*
+    //add all elements
     for (let todo in todoList) {
         let newElement = document.createElement("div");
         let newContent = document.createTextNode(
@@ -50,8 +81,8 @@ let updateTodoList = function() {
             });
         newElement.appendChild(newContent);
         newElement.appendChild(newDeleteButton);
-        todoListDiv.appendChild(newElement);
-    }
+        todo ListDiv.appendChild(newElement);
+    } */
 
 }
 
@@ -63,23 +94,25 @@ let deleteTodo = function(index) {
 
 let addTodo = function() {
     //get the elements in the form
-      let inputTitle = document.getElementById("inputTitle");
-      let inputDescription = document.getElementById("inputDescription");
-      let inputPlace = document.getElementById("inputPlace");
-      let inputDate = document.getElementById("inputDate");
+    let inputTitle = document.getElementById("inputTitle");
+    let inputDescription = document.getElementById("inputDescription");
+    let inputPlace = document.getElementById("inputPlace");
+    let inputDate = document.getElementById("inputDate");
     //get the values from the form
-      let newTitle = inputTitle.value;
-      let newDescription = inputDescription.value;
-      let newPlace = inputPlace.value;
-      let newDate = new Date(inputDate.value);
+    let newTitle = inputTitle.value;
+    let newDescription = inputDescription.value;
+    let newPlace = inputPlace.value;
+    let newDate = new Date(inputDate.value);
     //create new item
-      let newTodo = {
-          title: newTitle,
-          description: newDescription,
-          place: newPlace,
-          category: '',
-          dueDate: newDate
-      };
+    let newTodo = {
+        title: newTitle,
+        description: newDescription,
+        place: newPlace,
+        category: '',
+        dueDate: newDate
+    };
     //add item to the list
-      todoList.push(newTodo);
+    todoList.push(newTodo);
+    //saving the list to the clients local storage
+    window.localStorage.setItem("todos", JSON.stringify(todoList));
   }
