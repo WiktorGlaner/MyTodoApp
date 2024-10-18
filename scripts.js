@@ -1,5 +1,7 @@
 "use strict"; // this is a string mode that helps to write more secure code
 
+import {API_KEY, BIN_ID} from './config.js';
+
 let todoList = []; //declares a new array for Your todo list
 
 
@@ -28,7 +30,19 @@ let initList = function() {
     );
 }
 
-initList();
+//initList();
+
+let req = new XMLHttpRequest();
+
+req.onreadystatechange = () => {
+    if (req.readyState == XMLHttpRequest.DONE) {
+        console.log(req.responseText);
+    }
+};
+
+req.open("GET", `https://api.jsonbin.io/v3/b/${BIN_ID}/<BIN_VERSION | latest>`, true);
+req.setRequestHeader("X-Master-Key", API_KEY);
+req.send();
 
 let updateTodoList = function() {
     let todoListDiv =
