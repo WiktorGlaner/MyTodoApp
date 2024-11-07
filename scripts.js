@@ -1,6 +1,6 @@
 "use strict"; // this is a string mode that helps to write more secure code
 
-import {API_KEY, BIN_ID} from './config.js';
+import {API_KEY, BIN_ID, BIN_VERSION} from "./config.js";
 
 let todoList = []; //declares a new array for Your todo list
 
@@ -20,7 +20,7 @@ let initList = function() {
         dueDate: new Date(2024,10,16)
     },
     {
-        title: "Lecture test",
+        title: "Lecture test1",
         description: "Quick test from the first three lectures",
         place: "F6",
         category: '',
@@ -36,15 +36,19 @@ let req = new XMLHttpRequest();
 
 req.onreadystatechange = () => {
     if (req.readyState == XMLHttpRequest.DONE) {
-        console.log(req.responseText);
+        let response = JSON.parse(req.responseText);
+        todoList = response.record; // Zakładając, że dane są w polu 'record'
+        updateTodoList();
+        //console.log(req.responseText);
     }
 };
 
-req.open("GET", `https://api.jsonbin.io/v3/b/${BIN_ID}/<BIN_VERSION | latest>`, true);
+req.open("GET", `https://api.jsonbin.io/v3/b/${BIN_ID}/${BIN_VERSION}`, true);
 req.setRequestHeader("X-Master-Key", API_KEY);
 req.send();
 
 let updateTodoList = function() {
+    //console.log(BIN_ID);
     let todoListDiv =
     document.getElementById("todoListView");
 
@@ -104,6 +108,8 @@ setInterval(updateTodoList, 1000); //update the list every second
 
 let deleteTodo = function(index) {
     todoList.splice(index,1);
+    //update the list
+    //updateJSONbin();
 }
 
 let addTodo = function() {
@@ -129,4 +135,33 @@ let addTodo = function() {
     todoList.push(newTodo);
     //saving the list to the clients local storage
     window.localStorage.setItem("todos", JSON.stringify(todoList));
-  }
+    //update the list
+    updateJSONbin();
+}
+
+let updateJSONbin = function() {
+    let req = new XMLHttpRequest();
+
+    req.onreadystatechange = () => {
+    if (req.readyState == XMLHttpRequest.DONE) {
+        let response = JSON.parse(req.responseText);
+        
+        //console.log(req.responseText);
+    }
+    };
+
+    req.open("PUT", `https://api.jsonbin.io/v3/b/${BIN_ID}/${BIN_VERSION}`, true);
+    //req.setRequestHeader("Content-Type", "application/json");
+    req.setRequestHeader("X-Master-Key", API_KEY);
+    req.send('{"sample": "Hello World"}');
+
+    let data = JSON.stringify({record: todoList});
+    req.send(data);
+}
+
+let saveList = function() {
+    window.localStorage.setItem("todos", JSON.stringify(todoList));
+    updateJSONbin();
+};
+
+saveList();
