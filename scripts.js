@@ -57,27 +57,42 @@ let updateTodoList = function() {
     //add all elements
     let filterInput = document.getElementById("inputSearch");   
     for (let todo in todoList) {
-    if (
-        (filterInput.value == "") ||
-        (todoList[todo].title.includes(filterInput.value)) ||
-        (todoList[todo].description.includes(filterInput.value))
-    )   {
-        let newElement = document.createElement("p");
-        let newContent = document.createTextNode("tytuł:" + todoList[todo].title + "  opis:" +
-                                                todoList[todo].description + "  kategoria:" + 
-                                                todoList[todo].category);
+        if (
+            (filterInput.value == "") ||
+            (todoList[todo].title.includes(filterInput.value)) ||
+            (todoList[todo].description.includes(filterInput.value))
+        ) {
+            let newElement = document.createElement("div");
+            newElement.classList.add("card", "mb-3");
 
-        //add delete button
-        let newDeleteButton = document.createElement("input");
-        newDeleteButton.type = "button";
-        newDeleteButton.value = "x";
-        newDeleteButton.addEventListener("click",
-            function() {
+            let newContent = document.createElement("div");
+            newContent.classList.add("card-body");
+
+            let titleElement = document.createElement("h5");
+            titleElement.classList.add("card-title");
+            titleElement.textContent = "Tytuł: " + todoList[todo].title;
+
+            let descriptionElement = document.createElement("p");
+            descriptionElement.classList.add("card-text");
+            descriptionElement.textContent = "Opis: " + todoList[todo].description;
+
+            let categoryElement = document.createElement("p");
+            categoryElement.classList.add("card-text");
+            categoryElement.textContent = "Kategoria: " + todoList[todo].category;
+
+            let newDeleteButton = document.createElement("button");
+            newDeleteButton.classList.add("btn", "btn-danger");
+            newDeleteButton.textContent = "Usuń";
+            newDeleteButton.addEventListener("click", function () {
                 deleteTodo(todo);
             });
-        newElement.appendChild(newContent);
-        newElement.appendChild(newDeleteButton);
-        todoListDiv.appendChild(newElement);
+
+            newContent.appendChild(titleElement);
+            newContent.appendChild(descriptionElement);
+            newContent.appendChild(categoryElement);
+            newContent.appendChild(newDeleteButton);
+            newElement.appendChild(newContent);
+            todoListDiv.appendChild(newElement);
         }
     }
 }
