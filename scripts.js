@@ -32,70 +32,82 @@ let generateCategory = async function (title, description) {
 console.log(generateCategory("nauka", "matematyki"));
 
 let updateTodoList = function() {
-
     let req = new XMLHttpRequest();
-
     req.onreadystatechange = () => {
         if (req.readyState == XMLHttpRequest.DONE) {
             let response = JSON.parse(req.responseText);
             todoList = response.record;
         }
     };
-
     req.open("GET", `https://api.jsonbin.io/v3/b/${BIN_ID}/${BIN_VERSION}`, true);
     req.setRequestHeader("X-Master-Key", API_KEY);
     req.send();
-    //console.log(BIN_ID);
-    let todoListDiv =
-    document.getElementById("todoListView");
 
+    let todoTableView = document.getElementById("todoTableView");
+    
     //remove all elements
-    while (todoListDiv.firstChild) {
-        todoListDiv.removeChild(todoListDiv.firstChild);
+    while (todoTableView.firstChild) {
+        todoTableView.removeChild(todoTableView.firstChild);
     }
 
-    //add all elements
-    let filterInput = document.getElementById("inputSearch");   
-    for (let todo in todoList) {
-        if (
-            (filterInput.value == "") ||
-            (todoList[todo].title.includes(filterInput.value)) ||
-            (todoList[todo].description.includes(filterInput.value))
-        ) {
-            let newElement = document.createElement("div");
-            newElement.classList.add("card", "mb-3");
+    //add all elements based on filters
+    let filterInput = document.getElementById("inputSearch").value.toLowerCase();
+    let inputStartDate = document.getElementById("inputStartDate").value;
+    let inputEndDate = document.getElementById("inputEndDate").value;
 
-            let newContent = document.createElement("div");
-            newContent.classList.add("card-body");
-
-            let titleElement = document.createElement("h5");
-            titleElement.classList.add("card-title");
-            titleElement.textContent = "Tytuł: " + todoList[todo].title;
-
-            let descriptionElement = document.createElement("p");
-            descriptionElement.classList.add("card-text");
-            descriptionElement.textContent = "Opis: " + todoList[todo].description;
-
-            let categoryElement = document.createElement("p");
-            categoryElement.classList.add("card-text");
-            categoryElement.textContent = "Kategoria: " + todoList[todo].category;
-
-            let newDeleteButton = document.createElement("button");
-            newDeleteButton.classList.add("btn", "btn-danger");
-            newDeleteButton.textContent = "Usuń";
-            newDeleteButton.addEventListener("click", function () {
-                deleteTodo(todo);
-            });
-
-            newContent.appendChild(titleElement);
-            newContent.appendChild(descriptionElement);
-            newContent.appendChild(categoryElement);
-            newContent.appendChild(newDeleteButton);
-            newElement.appendChild(newContent);
-            todoListDiv.appendChild(newElement);
+    let filteredTodos = todoList.filter(todo => {
+        let matchesSearch = (filterInput === "") || todo.title.toLowerCase().includes(filterInput) || todo.description.toLowerCase().includes(filterInput);
+        let matchesDateRange = true;
+        
+        if (inputStartDate) {
+            matchesDateRange = matchesDateRange && (new Date(todo.dueDate) >= new Date(inputStartDate));
         }
-    }
-}
+        if (inputEndDate) {
+            matchesDateRange = matchesDateRange && (new Date(todo.dueDate) <= new Date(inputEndDate));
+        }
+
+        return matchesSearch && matchesDateRange;
+    });
+
+    filteredTodos.forEach(todo => {
+
+        // Create table row elements for todoTableView
+        let row = document.createElement("tr");
+
+        let titleCell = document.createElement("td");
+        titleCell.textContent = todo.title;
+
+        let descriptionCell = document.createElement("td");
+        descriptionCell.textContent = todo.description;
+
+        let placeCell = document.createElement("td");
+        placeCell.textContent = todo.place;
+
+        let categoryCell = document.createElement("td");
+        categoryCell.textContent = todo.category;
+
+        let dueDateCell = document.createElement("td");
+        dueDateCell.textContent = new Date(todo.dueDate).toLocaleDateString();
+
+        let actionCell = document.createElement("td");
+        let deleteButton = document.createElement("button");
+        deleteButton.classList.add("btn", "btn-danger");
+        deleteButton.textContent = "Usuń";
+        deleteButton.addEventListener("click", function () {
+            deleteTodo(todo);
+        });
+        actionCell.appendChild(deleteButton);
+
+        row.appendChild(titleCell);
+        row.appendChild(descriptionCell);
+        row.appendChild(placeCell);
+        row.appendChild(categoryCell);
+        row.appendChild(dueDateCell);
+        row.appendChild(actionCell);
+
+        todoTableView.appendChild(row);
+    });
+};
 
 setInterval(updateTodoList, 1000); //update the list every second
 
